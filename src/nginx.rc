@@ -1,0 +1,29 @@
+#include "version.h"
+
+1 VERSIONINFO
+FILEVERSION MAJORnginx,SUBMAJORnginx,MINORnginx,SUBMINORnginx
+PRODUCTVERSION MAJORnginx,SUBMAJORnginx,MINORnginx,SUBMINORnginx
+FILETYPE 1
+FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "Comments", "nginx - tiny http server, https://nginx.org/\0"
+            VALUE "CompanyName", "Vladimir Dubrovin\0"
+            VALUE "FileDescription", "nginx - tiny http server\0"
+            VALUE "FileVersion", RELEASEnginx
+            VALUE "InternalName", "nginx\0"
+            VALUE "LegalCopyright", "Copyright (C) 2002-" YEARnginx " Vladimir Dubrovin\0"
+            VALUE "OriginalFilename", "nginx.exe\0"
+            VALUE "ProductName", "nginx\0"
+            VALUE "ProductVersion", RELEASEnginx
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END
+0 ICON    DISCARDABLE     "nginx.ico"

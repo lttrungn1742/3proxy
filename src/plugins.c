@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 unsigned bandlimitfunc(struct clientparam *param, unsigned nbytesin, unsigned nbytesout);
 void trafcountfunc(struct clientparam *param);
@@ -16,10 +16,10 @@ unsigned hashindex(struct hashtable *ht, const unsigned char* hash);
 void decodeurl(unsigned char *s, int allowcr);
 int parsestr (unsigned char *str, unsigned char **argm, int nitems, unsigned char ** buff, int *inbuf, int *bufsize);
 struct ace * make_ace (int argc, unsigned char ** argv);
-extern char * proxy_stringtable[];
+extern char * http_stringtable[];
 extern char * admin_stringtable[];
 extern struct schedule * schedule;
-int start_proxy_thread(struct child * chp);
+int start_http_thread(struct child * chp);
 
 extern int linenum;
 extern char *conffile;
@@ -54,14 +54,14 @@ struct symbol symbols[] = {
 	{symbols+27, "hash_mutex", (void *) &hash_mutex},
 	{symbols+28, "pwl_mutex", (void *) &pwl_mutex},
 	{symbols+29, "linenum", (void *) &linenum},
-	{symbols+30, "proxy_stringtable", (void *) proxy_stringtable},
+	{symbols+30, "http_stringtable", (void *) http_stringtable},
 	{symbols+31, "en64", (void *) en64},
 	{symbols+32, "de64", (void *) de64},
 	{symbols+33, "tohex", (void *) tohex},
 	{symbols+34, "fromhex", (void *) fromhex},
 	{symbols+35, "dnspr", (void *) dnsprchild},
 	{symbols+36, "pop3p", (void *) pop3pchild},
-	{symbols+37, "proxy", (void *) proxychild},
+	{symbols+37, "http", (void *) httpchild},
 	{symbols+38, "socks", (void *) sockschild},
 	{symbols+39, "tcppm", (void *) tcppmchild},
 	{symbols+40, "udppm", (void *) udppmchild},
@@ -125,12 +125,12 @@ struct pluginlink pluginlink = {
 	myrealloc,
 	mystrdup,
 	trafcountfunc,
-	proxy_stringtable,
+	http_stringtable,
 	&schedule,
 	freeacl,
 	admin_stringtable,
 	&childdef,
-	start_proxy_thread,
+	start_http_thread,
 	freeparam,
 	parsehostname,
 	parseusername,

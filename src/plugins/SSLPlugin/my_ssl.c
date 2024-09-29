@@ -1,5 +1,5 @@
 /*
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
@@ -21,7 +21,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-#include "../../proxy.h"
+#include "../../http.h"
 #include "my_ssl.h"
 
 

@@ -1,11 +1,11 @@
 #!/bin/bash
-# 3proxy build and install script for Debian Linux 
+# nginx build and install script for Debian Linux 
 # Release 2.0 at 29.12.2016
 # (с) Evgeniy Solovyev 
 # mail-to: eugen-soloviov@yandex.ru
 
 ScriptPath=""
-Src3proxyDirPath=""
+SrcnginxDirPath=""
 ScriptName=""
 ScriptFullName=""
 SourceRoot=""
@@ -13,9 +13,9 @@ SourceRoot=""
 ResourcesData=""
 
 
-ProxyVersion=""
-LasestProxyVersion=""
-LasestProxyVersionLink=""
+httpVersion=""
+LasesthttpVersion=""
+LasesthttpVersionLink=""
 UseSudo=0
 PacketFiles=""
 NeedSourceUpdate=0
@@ -43,13 +43,13 @@ main()
 	
 	cd "${SourceRoot}"
 	
-	Build3Proxy
+	Buildnginx
 	BinInstall
 	ManInstall
 	CreateLogDir
 	CopyConfig
 	SetInit
-	Pack3proxyFiles
+	PacknginxFiles
 }
 
 VarsInit()
@@ -62,17 +62,17 @@ VarsInit()
 
 CheckLocation()
 {
-	Src3proxyDirPath="${ScriptPath}"
+	SrcnginxDirPath="${ScriptPath}"
 	
 	if echo ${ScriptPath} | grep -e "/scripts$"
 	then
 		if [ -e "../src/version.h" ]
 		then
-			ProxyVersion=`cat "../src/version.h" | awk '/VERSION/ { gsub("\"", "\n"); print; exit }' | grep "3proxy"`
+			httpVersion=`cat "../src/version.h" | awk '/VERSION/ { gsub("\"", "\n"); print; exit }' | grep "nginx"`
 			cd ../
 			SourceRoot="${PWD}"
 			cd ../
-			Src3proxyDirPath="${PWD}"
+			SrcnginxDirPath="${PWD}"
 			cd "${ScriptPath}"
 		fi
 	fi
@@ -83,7 +83,7 @@ GetLasestVersionInfo()
 	local Githublink
 	local msg
 	
-	Githublink=`wget https://github.com/3proxy/3proxy/releases/latest -O /dev/stdout |
+	Githublink=`wget https://github.com/nginx/nginx/releases/latest -O /dev/stdout |
 	awk '/<a.+href=.+\.tar\.gz/ { gsub("\"", "\n"); print; exit }' |
 	grep -e ".tar.gz"`
 	if [ $? != 0 ]
@@ -93,9 +93,9 @@ GetLasestVersionInfo()
 		exit 255
 	fi
 	
-	LasestProxyVersionLink="https://github.com${Githublink}"
+	LasesthttpVersionLink="https://github.com${Githublink}"
 
-	LasestProxyVersion=`basename "${Githublink}" | awk 'gsub(".tar.gz", "") { print "3proxy-" $0 }'`
+	LasesthttpVersion=`basename "${Githublink}" | awk 'gsub(".tar.gz", "") { print "nginx-" $0 }'`
 }
 
 CheckRunConditions()
@@ -126,9 +126,9 @@ CheckRunConditions()
 			exit 255
 		fi
 		
-		if [ `env | grep -e ^http_proxy` != "" ]
+		if [ `env | grep -e ^http_http` != "" ]
 		then
-			msg=`GetResource "msgSystemUseProxy"`
+			msg=`GetResource "msgSystemUsehttp"`
 			echo -e "${msg}"
 			
 			msgContinueWork=`GetResource "msgDoYouWishContinue"`
@@ -150,31 +150,31 @@ CheckRunConditions()
 
 DonwnloadSource()
 {
-	if [ ! -e "${Src3proxyDirPath}/${LasestProxyVersion}.tar.gz" ] 
+	if [ ! -e "${SrcnginxDirPath}/${LasesthttpVersion}.tar.gz" ] 
 	then
-		wget "${LasestProxyVersionLink}" -O "${Src3proxyDirPath}/${LasestProxyVersion}.tar.gz"
+		wget "${LasesthttpVersionLink}" -O "${SrcnginxDirPath}/${LasesthttpVersion}.tar.gz"
 	fi
 	
-	ProxyVersion="${LasestProxyVersion}"
+	httpVersion="${LasesthttpVersion}"
 }
 
 UnpackSource()
 {
-	if [ ! -d "${Src3proxyDirPath}/${LasestProxyVersion}" ]
+	if [ ! -d "${SrcnginxDirPath}/${LasesthttpVersion}" ]
 	then
-		tar -xvf "${Src3proxyDirPath}/${LasestProxyVersion}.tar.gz" -C "${Src3proxyDirPath}"
+		tar -xvf "${SrcnginxDirPath}/${LasesthttpVersion}.tar.gz" -C "${SrcnginxDirPath}"
 	fi
 	
-	SourceRoot="${Src3proxyDirPath}/${LasestProxyVersion}"
+	SourceRoot="${SrcnginxDirPath}/${LasesthttpVersion}"
 }
 
 SourceDownloadOrUpdate()
 {
-	if [ -z "${ProxyVersion}" ]
+	if [ -z "${httpVersion}" ]
 	then
 		NeedSourceUpdate=1
 	else
-		if [ "${ProxyVersion}" != "${LasestProxyVersion}" ]
+		if [ "${httpVersion}" != "${LasesthttpVersion}" ]
 		then
 			msgNewVersion=`GetResource "msgNewVersion"`
 			msgInsertYorN=`GetResource "msgPleaseInsertYorN"`
@@ -199,7 +199,7 @@ SourceDownloadOrUpdate()
 	fi
 }
 
-Build3Proxy()
+Buildnginx()
 {
 	local msg
 	
@@ -288,7 +288,7 @@ ManInstall()
 CreateLogDir()
 {
 	local LogDir
-	LogDir="/var/log/3proxy"
+	LogDir="/var/log/nginx"
 	
 	if [ ! -d  "${LogDir}" ]
 	then
@@ -304,35 +304,35 @@ CreateLogDir()
 CopyConfig()
 {
 	local ConfigDir
-	ConfigDir="/etc/3proxy"
+	ConfigDir="/etc/nginx"
 	
 	if [ ! -d  "${ConfigDir}" ]
 	then
 		mkdir "${ConfigDir}"
 	fi
 	
-	LoadGlobalResource "ConfigFile" > "${ConfigDir}/3proxy.cfg"
+	LoadGlobalResource "ConfigFile" > "${ConfigDir}/nginx.cfg"
 
-	PacketFiles=`echo -e "${PacketFiles}\n${ConfigDir}/3proxy.cfg"`
+	PacketFiles=`echo -e "${PacketFiles}\n${ConfigDir}/nginx.cfg"`
 }
 
 
 SetInit()
 {
-	LoadGlobalResource "InitScript" > "/etc/init.d/3proxy"
-	chown root:root "/etc/init.d/3proxy"
-	chmod 755 "/etc/init.d/3proxy"
+	LoadGlobalResource "InitScript" > "/etc/init.d/nginx"
+	chown root:root "/etc/init.d/nginx"
+	chmod 755 "/etc/init.d/nginx"
 	
-	PacketFiles=`echo -e "${PacketFiles}\n/etc/init.d/3proxy"`
-	update-rc.d 3proxy defaults
+	PacketFiles=`echo -e "${PacketFiles}\n/etc/init.d/nginx"`
+	update-rc.d nginx defaults
 }
 
-Pack3proxyFiles()
+PacknginxFiles()
 {
 	local CPU_Arc
 	CPU_Arc=`uname -m`
 	cd ../
-	tar -czPpvf "${ProxyVersion}-${CPU_Arc}.tar.gz" $PacketFiles
+	tar -czPpvf "${httpVersion}-${CPU_Arc}.tar.gz" $PacketFiles
 }
 
 LoadResources()
@@ -465,12 +465,12 @@ Please run the script under the account "root",
 or configure "sudo" package!
 #endResource=msgUserNotMemberOfSudoGroup
 
-#Resource=msgSystemUseProxy
-\aAttention! The operating system uses proxy-server.
+#Resource=msgSystemUsehttp
+\aAttention! The operating system uses http-server.
 For correctly work of package manager "apt" 
 in the file "/etc/sudoers" should be present line:
-Defaults env_keep = "http_proxy https_proxy"
-#endResource=msgSystemUseProxy
+Defaults env_keep = "http_http https_http"
+#endResource=msgSystemUsehttp
 
 #Resource=msgDoYouWishContinue
 Do you wish to the script continued executing? (y/n):
@@ -481,12 +481,12 @@ Do you wish to the script continued executing? (y/n):
 #endResource=msgPleaseInsertYorN
 
 #Resource=msgInternetConnectionError
-\aError downloading "https://github.com/z3APA3A/3proxy/releases/latest"!
+\aError downloading "https://github.com/z3APA3A/nginx/releases/latest"!
 Please check the settings of the Internet connection.
 #endResource=msgInternetConnectionError
 
 #Resource=msgNewVersion
-The new version of "3proxy" detected, do you want download it?
+The new version of "nginx" detected, do you want download it?
 #endResource=msgNewVersion
 
 #Resource=msgBuildEssentialNotInstalled
@@ -516,12 +516,12 @@ The installation can not be continued!
 либо настройте пакет "sudo"!
 #endResource=msgUserNotMemberOfSudoGroup
 
-#Resource=msgSystemUseProxy
+#Resource=msgSystemUsehttp
 \aВнимание! В системе используется прокси-сервер.
 Чтобы менеджер пакетов "apt" работал корректно,
 в файле "/etc/sudoers" должна присутствовать строка:
-Defaults env_keep = "http_proxy https_proxy"
-#endResource=msgSystemUseProxy
+Defaults env_keep = "http_http https_http"
+#endResource=msgSystemUsehttp
 
 #Resource=msgDoYouWishContinue
 Хотите чтобы скрипт дальше продолжил работу? (y/n):
@@ -532,12 +532,12 @@ Defaults env_keep = "http_proxy https_proxy"
 #endResource=msgPleaseInsertYorN
 
 #Resource=msgInternetConnectionError
-\aОшибка закачки "https://github.com/z3APA3A/3proxy/releases/latest"!
+\aОшибка закачки "https://github.com/z3APA3A/nginx/releases/latest"!
 Пожалуйста, проверьте настройки интернет соединения.
 #endResource=msgInternetConnectionError
 
 #Resource=msgNewVersion
-Обнаружена новая версия "3proxy", скачать её (y/n)?
+Обнаружена новая версия "nginx", скачать её (y/n)?
 #endResource=msgNewVersion
 
 #Resource=msgBuildEssentialNotInstalled
@@ -550,33 +550,33 @@ Defaults env_keep = "http_proxy https_proxy"
 
 #Resource=ConfigFile
 noconfig
-# If in this file have line "noconfig", then 3proxy not to be runned!
-# For usung this configuration file 3proxy you must to delete 
+# If in this file have line "noconfig", then nginx not to be runned!
+# For usung this configuration file nginx you must to delete 
 # or comment out the line with "noconfig".
 
 daemon
-# Parameter "daemon" - means run 3proxy as daemon
+# Parameter "daemon" - means run nginx as daemon
 
 
-pidfile /tmp/3proxy.pid
+pidfile /tmp/nginx.pid
 # PID file location 
 # This parameter must have the same value as 
-# the variable "PidFile" in  the script "/etc/init.d/3proxy"
+# the variable "PidFile" in  the script "/etc/init.d/nginx"
 
 
 # Configuration file location
-config /etc/3proxy/3proxy.cfg
+config /etc/nginx/nginx.cfg
 
 
 internal 127.0.0.1
-# Internal is address of interface proxy will listen for incoming requests
-# 127.0.0.1 means only localhost will be able to use this proxy. This is
-# address you should specify for clients as proxy IP.
+# Internal is address of interface http will listen for incoming requests
+# 127.0.0.1 means only localhost will be able to use this http. This is
+# address you should specify for clients as http IP.
 # You MAY use 0.0.0.0 but you shouldn't, because it's a chance for you to
-# have open proxy in your network in this case.
+# have open http in your network in this case.
 
 external 192.168.0.1
-# External is address 3proxy uses for outgoing connections. 0.0.0.0 means any
+# External is address nginx uses for outgoing connections. 0.0.0.0 means any
 # interface. Using 0.0.0.0 is not good because it allows to connect to 127.0.0.1
 
 
@@ -593,7 +593,7 @@ timeouts 1 5 30 60 180 1800 15 60
 
 
 # log file location
-log /var/log/3proxy/3proxy.log D
+log /var/log/nginx/nginx.log D
 
 # log file format
 logformat "L%C - %U [%d-%o-%Y %H:%M:%S %z] ""%T"" %E %I %O %N/%R:%r"
@@ -607,41 +607,41 @@ archiver gz /usr/bin/gzip %F
 rotate 30
 # We will keep last 30 log files
 
-proxy -p3128
-# Run http/https proxy on port 3128
+http -p3128
+# Run http/https http on port 3128
 
 auth none
 # No authentication is requires
 
 setgid 65534
 setuid 65534
-# Run 3proxy under account "nobody" with group "nobody"
+# Run nginx under account "nobody" with group "nobody"
 #endResource=ConfigFile
 
 
 #Resource=InitScript
 #!/bin/sh
 #
-# 3proxy daemon control script
+# nginx daemon control script
 #
 ### BEGIN INIT INFO
-# Provides:          3proxy
+# Provides:          nginx
 # Required-Start:    $network $remote_fs $syslog
 # Required-Stop:     $network $remote_fs $syslog
 # Should-Start:      $named
 # Should-Stop:       $named
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: 3proxy HTTP Proxy
+# Short-Description: nginx HTTP http
 ### END INIT INFO
 
 
-ScriptName="3proxy"
-ScriptFullName="/etc/init.d/3proxy"
+ScriptName="nginx"
+ScriptFullName="/etc/init.d/nginx"
 
-ConfigFile="/etc/3proxy/3proxy.cfg"
-LogDir="/var/log/3proxy"
-PidFile="/tmp/3proxy.pid"
+ConfigFile="/etc/nginx/nginx.cfg"
+LogDir="/var/log/nginx"
+PidFile="/tmp/nginx.pid"
 
 ResourcesData=""
 
@@ -666,7 +666,7 @@ main()
 Start()
 {
 	local msg
-	local ProxyPID
+	local httpPID
 	
 	if [ ! -f "${ConfigFile}" ]
 	then
@@ -682,71 +682,71 @@ Start()
 		return
 	fi
 	
-	ProxyPID=`Get3proxyPID`
+	httpPID=`GetnginxPID`
 	
-	if [ ! -z "${ProxyPID}" ]
+	if [ ! -z "${httpPID}" ]
 	then
-		msg=`GetResource "msg3proxyAlreadyRunning"`
-		printf "${msg}" "${ProxyPID}"
+		msg=`GetResource "msgnginxAlreadyRunning"`
+		printf "${msg}" "${httpPID}"
 		return
 	fi
 	
-	3proxy "${ConfigFile}"
+	nginx "${ConfigFile}"
 	sleep 1
 	
-	ProxyPID=`Get3proxyPID`
+	httpPID=`GetnginxPID`
 	
 	if [ ! -f "${PidFile}" ] 
 	then
-		msg=`GetResource "msg3proxyStartProblems"`
+		msg=`GetResource "msgnginxStartProblems"`
 		printf "${msg}"
 		return
 	fi
 	
-	if [ `cat "${PidFile}"` != "${ProxyPID}" ]
+	if [ `cat "${PidFile}"` != "${httpPID}" ]
 	then
-		msg=`GetResource "msg3proxyStartProblems"`
+		msg=`GetResource "msgnginxStartProblems"`
 		printf "${msg}"
 		return
 	fi
 	
-	msg=`GetResource "msg3proxyStartedSuccessfully"`
-	printf "${msg}" `date +%d-%m-%Y" "%H:%M:%S` "${ProxyPID}"
+	msg=`GetResource "msgnginxStartedSuccessfully"`
+	printf "${msg}" `date +%d-%m-%Y" "%H:%M:%S` "${httpPID}"
 
 }
 
 Stop()
 {
 	local msg
-	local ProxyPID
+	local httpPID
 	
-	ProxyPID=`Get3proxyPID`
+	httpPID=`GetnginxPID`
 	
 	if [ -f "${PidFile}" ] 
 	then
-		if [ `cat "${PidFile}"` = "${ProxyPID}" ]
+		if [ `cat "${PidFile}"` = "${httpPID}" ]
 		then
-			kill -9 "${ProxyPID}"
+			kill -9 "${httpPID}"
 			rm -f "${PidFile}"
 			
-			msg=`GetResource "msg3proxyStoppedSuccessfully"`
+			msg=`GetResource "msgnginxStoppedSuccessfully"`
 			printf "${msg}" `date +%d-%m-%Y" "%H:%M:%S`
 			
 			return
 		fi
 	fi
 	
-	if [ -z "${ProxyPID}" ]
+	if [ -z "${httpPID}" ]
 	then
-		msg=`GetResource "msg3proxyProxyNotDetected"`
+		msg=`GetResource "msgnginxhttpNotDetected"`
 		printf "${msg}"
 		
 		return
 	fi
 	
-	pkill -o 3proxy
+	pkill -o nginx
 	
-	msg=`GetResource "msg3proxyStoppedByKillall"`
+	msg=`GetResource "msgnginxStoppedByKillall"`
 	printf "${msg}" `date +%d-%m-%Y" "%H:%M:%S` "${PidFile}"
 	
 }
@@ -754,7 +754,7 @@ Stop()
 Status()
 {
 	local msg
-	local ProxyPID
+	local httpPID
 	
 	if [ -f "${PidFile}" ] 
 	then
@@ -765,15 +765,15 @@ Status()
 		printf "${msg}" "${PidFile}"
 	fi
 	
-	ProxyPID=`Get3proxyPID`
+	httpPID=`GetnginxPID`
 	
-	if [ ! -z  "${ProxyPID}" ]
+	if [ ! -z  "${httpPID}" ]
 	then
-		msg=`GetResource "msg3proxyProcessDetected"`
+		msg=`GetResource "msgnginxProcessDetected"`
 		printf "${msg}"
-		ps -ef | awk '$8 ~ /^3proxy/ { print "User: " $1 "\tPID: " $2 }'
+		ps -ef | awk '$8 ~ /^nginx/ { print "User: " $1 "\tPID: " $2 }'
 	else
-		msg=`GetResource "msg3proxyProcessNotDetected"`
+		msg=`GetResource "msgnginxProcessNotDetected"`
 		printf "${msg}"
 	fi
 }
@@ -782,13 +782,13 @@ ShowHelp()
 {
 	local msg
 	
-	msg=`GetResource "msg3proxyHelp"`
+	msg=`GetResource "msgnginxHelp"`
 	printf "${msg}" "${ScriptFullName}" "${ScriptName}"
 }
 
-Get3proxyPID()
+GetnginxPID()
 {
-	ps -ef | awk '$8 ~ /^3proxy/ { print $2; exit }'
+	ps -ef | awk '$8 ~ /^nginx/ { print $2; exit }'
 }
 
 LoadResources()
@@ -856,130 +856,130 @@ exit 0;
 
 #Resources_EN
 
-#Resource=msg3proxyHelp
+#Resource=msgnginxHelp
 Usage:
 \t%s {start|stop|restart}
 or
 \tservice %s {start|stop|restart|status}\\n
-#endResource=msg3proxyHelp
+#endResource=msgnginxHelp
 
 #Resource=msgConfigFileNotFound
-\a3proxy configuration file - "%s" is not found!\\n
+\anginx configuration file - "%s" is not found!\\n
 #endResource=msgConfigFileNotFound
 
 #Resource=msgNoconfigDetected
-Parameter "noconfig" found in 3proxy configuration file -
+Parameter "noconfig" found in nginx configuration file -
 "% s" !
-To run 3proxy this parameter should be disabled.\\n
+To run nginx this parameter should be disabled.\\n
 #endResource=msgNoconfigDetected
 
-#Resource=msg3proxyAlreadyRunning
-\a3proxy already running PID: %s\\n
-#endResource=msg3proxyAlreadyRunning
+#Resource=msgnginxAlreadyRunning
+\anginx already running PID: %s\\n
+#endResource=msgnginxAlreadyRunning
 
-#Resource=msg3proxyStartProblems
-With the start of 3proxy, something is wrong! 
-Use: service 3proxy status\\n
-#endResource=msg3proxyStartProblems
+#Resource=msgnginxStartProblems
+With the start of nginx, something is wrong! 
+Use: service nginx status\\n
+#endResource=msgnginxStartProblems
 
-#Resource=msg3proxyStartedSuccessfully
-[ %s %s ] 3proxy started successfully! PID: %s\\n
-#endResource=msg3proxyStartedSuccessfully
+#Resource=msgnginxStartedSuccessfully
+[ %s %s ] nginx started successfully! PID: %s\\n
+#endResource=msgnginxStartedSuccessfully
 
-#Resource=msg3proxyStoppedSuccessfully
-[ %s %s ] 3proxy stopped successfully!\\n
-#endResource=msg3proxyStoppedSuccessfully
+#Resource=msgnginxStoppedSuccessfully
+[ %s %s ] nginx stopped successfully!\\n
+#endResource=msgnginxStoppedSuccessfully
 
-#Resource=msg3proxyProxyNotDetected
-Process "3proxy" is not detected!\\n
-#endResource=msg3proxyProxyNotDetected
+#Resource=msgnginxhttpNotDetected
+Process "nginx" is not detected!\\n
+#endResource=msgnginxhttpNotDetected
 
-#Resource=msg3proxyStoppedByKillall
-[ %s %s ] Command "pkill -o 3proxy" was executed,
+#Resource=msgnginxStoppedByKillall
+[ %s %s ] Command "pkill -o nginx" was executed,
 because process number was not stored in "%s",
-but in fact 3proxy was runned!\\n
-#endResource=msg3proxyStoppedByKillall
+but in fact nginx was runned!\\n
+#endResource=msgnginxStoppedByKillall
 
 #Resource=msgPidFileExists
 File "%s" exists. It contains the PID: %s\\n
 #endResource=msgPidFileExists
 
 #Resource=msgPidFileNotExists
-File "%s" not found, that is, PID 3proxy was not stored!\\n
+File "%s" not found, that is, PID nginx was not stored!\\n
 #endResource=msgPidFileNotExists
 
-#Resource=msg3proxyProcessDetected
-Process 3proxy detected:\\n
-#endResource=msg3proxyProcessDetected
+#Resource=msgnginxProcessDetected
+Process nginx detected:\\n
+#endResource=msgnginxProcessDetected
 
-#Resource=msg3proxyProcessNotDetected
-Processes of 3proxy is not found!\\n
-#endResource=msg3proxyProcessNotDetected
+#Resource=msgnginxProcessNotDetected
+Processes of nginx is not found!\\n
+#endResource=msgnginxProcessNotDetected
 
 #Resources_EN_end
 
 
 #Resources_RU
 
-#Resource=msg3proxyHelp
+#Resource=msgnginxHelp
 Используйте:
 \t%s {start|stop|restart}
 или
 \tservice %s {start|stop|restart|status}\\n
-#endResource=msg3proxyHelp
+#endResource=msgnginxHelp
 
 #Resource=msgConfigFileNotFound
-\aФайл конфигурации 3proxy - "%s", не найден!\\n
+\aФайл конфигурации nginx - "%s", не найден!\\n
 #endResource=msgConfigFileNotFound
 
 #Resource=msgNoconfigDetected
-\aОбнаружен параметр "noconfig" в файле конфигурации 3proxy -
+\aОбнаружен параметр "noconfig" в файле конфигурации nginx -
 "%s" !
-Для запуска 3proxy этот параметр нужно отключить.\\n
+Для запуска nginx этот параметр нужно отключить.\\n
 #endResource=msgNoconfigDetected
 
-#Resource=msg3proxyAlreadyRunning
-\a3proxy уже запущен PID: %s\\n
-#endResource=msg3proxyAlreadyRunning
+#Resource=msgnginxAlreadyRunning
+\anginx уже запущен PID: %s\\n
+#endResource=msgnginxAlreadyRunning
 
-#Resource=msg3proxyStartProblems
-\aСо стартом 3proxy, что-то не так!
-Используйте: service 3proxy status\\n
-#endResource=msg3proxyStartProblems
+#Resource=msgnginxStartProblems
+\aСо стартом nginx, что-то не так!
+Используйте: service nginx status\\n
+#endResource=msgnginxStartProblems
 
-#Resource=msg3proxyStartedSuccessfully
-[ %s %s ] 3proxy успешно стартовал! PID: %s\\n
-#endResource=msg3proxyStartedSuccessfully
+#Resource=msgnginxStartedSuccessfully
+[ %s %s ] nginx успешно стартовал! PID: %s\\n
+#endResource=msgnginxStartedSuccessfully
 
-#Resource=msg3proxyStoppedSuccessfully
-[ %s %s ] 3proxy успешно остановлен!\\n
-#endResource=msg3proxyStoppedSuccessfully
+#Resource=msgnginxStoppedSuccessfully
+[ %s %s ] nginx успешно остановлен!\\n
+#endResource=msgnginxStoppedSuccessfully
 
-#Resource=msg3proxyProxyNotDetected
-Процесс "3proxy" не обнаружен!\\n
-#endResource=msg3proxyProxyNotDetected
+#Resource=msgnginxhttpNotDetected
+Процесс "nginx" не обнаружен!\\n
+#endResource=msgnginxhttpNotDetected
 
-#Resource=msg3proxyStoppedByKillall
-[ %s %s ] Выполнена команда "pkill -o 3proxy",
+#Resource=msgnginxStoppedByKillall
+[ %s %s ] Выполнена команда "pkill -o nginx",
 т.к. номер процесса не записан в "%s",
-но по факту 3proxy рабатал!\\n
-#endResource=msg3proxyStoppedByKillall
+но по факту nginx рабатал!\\n
+#endResource=msgnginxStoppedByKillall
 
 #Resource=msgPidFileExists
 Файл "%s" есть. Он содержит PID: %s\\n
 #endResource=msgPidFileExists
 
 #Resource=msgPidFileNotExists
-Файл "%s" не найден, т.е. PID 3proxy не был сохранён!\\n
+Файл "%s" не найден, т.е. PID nginx не был сохранён!\\n
 #endResource=msgPidFileNotExists
 
-#Resource=msg3proxyProcessDetected
-Обнаружен процесс 3proxy:\\n
-#endResource=msg3proxyProcessDetected
+#Resource=msgnginxProcessDetected
+Обнаружен процесс nginx:\\n
+#endResource=msgnginxProcessDetected
 
-#Resource=msg3proxyProcessNotDetected
-Процессов 3proxy не обнаружено!\\n
-#endResource=msg3proxyProcessNotDetected
+#Resource=msgnginxProcessNotDetected
+Процессов nginx не обнаружено!\\n
+#endResource=msgnginxProcessNotDetected
 
 #Resources_RU_end
 #endResource=InitScript

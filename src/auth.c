@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 
 int clientnegotiate(struct chain * redir, struct clientparam * param, struct sockaddr * addr, unsigned char * hostname){
@@ -56,7 +56,7 @@ int clientnegotiate(struct chain * redir, struct clientparam * param, struct soc
 			len += sprintf((char *)buf + len,
 				":%hu HTTP/1.0\r\nConnection: keep-alive\r\n", ntohs(*SAPORT(addr)));
 			if(user){
-				len += sprintf((char *)buf + len, "Proxy-Authorization: Basic ");
+				len += sprintf((char *)buf + len, "http-Authorization: Basic ");
 				sprintf((char *)username, "%.128s:%.128s", user, pass?pass:(unsigned char *)"");
 				en64(username, buf+len, (int)strlen((char *)username));
 				len = (int)strlen((char *)buf);
@@ -306,7 +306,7 @@ int handleredirect(struct clientparam * param, struct ace * acentry){
 						param->redirectfunc = tlsprchild;
 						break;
 					default:
-						param->redirectfunc = proxychild;
+						param->redirectfunc = httpchild;
 				}
 				if(cur->next)continue;
 				return 0;

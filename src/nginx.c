@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 #ifndef _WIN32
 #include <sys/resource.h>
 #ifndef NOPLUGINS
@@ -372,17 +372,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int 
 #ifdef _WINCE
 	argc = ceparseargs((char *)lpCmdLine);
 	argv = ceargv;
-	if(FindWindow(L"3proxy", L"3proxy")) return 0;
+	if(FindWindow(L"nginx", L"nginx")) return 0;
 	ZeroMemory(&wc,sizeof(wc));
 	wc.hbrBackground=(HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.hInstance=hInstance;
 	wc.hCursor=LoadCursor(NULL,IDC_ARROW);
 	wc.lpfnWndProc=DefWindowProc;
 	wc.style=CS_HREDRAW|CS_VREDRAW;
-	wc.lpszClassName=L"3proxy";
+	wc.lpszClassName=L"nginx";
 	RegisterClass(&wc);
 
-	hwnd = CreateWindowEx(0,L"3proxy",L"3proxy",WS_VISIBLE|WS_POPUP,0,0,0,0,0,0,hInstance,0);
+	hwnd = CreateWindowEx(0,L"nginx",L"nginx",WS_VISIBLE|WS_POPUP,0,0,0,0,0,0,hInstance,0);
 #endif
 
   conf.stringtable = strings;

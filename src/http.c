@@ -1,17 +1,17 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
 
-#include "proxy.h"
+#include "http.h"
 
 #define RETURN(xxx) { param->res = xxx; goto CLEANRET; }
 
-char * proxy_stringtable[] = {
+char * http_stringtable[] = {
 /* 0 */	"HTTP/1.0 400 Bad Request\r\n"
 	"Connection: close\r\n"
 	"Content-type: text/html; charset=utf-8\r\n"
@@ -45,29 +45,29 @@ char * proxy_stringtable[] = {
 	"Content-type: text/html; charset=utf-8\r\n"
 	"\r\n"
 	"<html><head><title>501 Not Implemented</title></head>\r\n"
-	"<body><h2>501 Not Implemented</h2><h3>Required action is not supported by proxy server</h3></body></html>\r\n",
+	"<body><h2>501 Not Implemented</h2><h3>Required action is not supported by http server</h3></body></html>\r\n",
 
 /* 5 */	"HTTP/1.0 502 Bad Gateway\r\n"
 	"Connection: close\r\n"
 	"Content-type: text/html; charset=utf-8\r\n"
 	"\r\n"
 	"<html><head><title>502 Bad Gateway</title></head>\r\n"
-	"<body><h2>502 Bad Gateway</h2><h3>Failed to connect parent proxy</h3></body></html>\r\n",
+	"<body><h2>502 Bad Gateway</h2><h3>Failed to connect parent http</h3></body></html>\r\n",
 
 /* 6 */	"HTTP/1.0 500 Internal Error\r\n"
 	"Connection: close\r\n"
 	"Content-type: text/html; charset=utf-8\r\n"
 	"\r\n"
 	"<html><head><title>500 Internal Error</title></head>\r\n"
-	"<body><h2>500 Internal Error</h2><h3>Internal proxy error during processing your request</h3></body></html>\r\n",
+	"<body><h2>500 Internal Error</h2><h3>Internal http error during processing your request</h3></body></html>\r\n",
 
-/* 7 */	"HTTP/1.0 407 Proxy Authentication Required\r\n"
-	"Proxy-Authenticate: Basic realm=\"proxy\"\r\n"
+/* 7 */	"HTTP/1.0 407 http Authentication Required\r\n"
+	"http-Authenticate: Basic realm=\"http\"\r\n"
 	"Connection: close\r\n"
 	"Content-type: text/html; charset=utf-8\r\n"
 	"\r\n"
-	"<html><head><title>407 Proxy Authentication Required</title></head>\r\n"
-	"<body><h2>407 Proxy Authentication Required</h2><h3>Access to requested resource disallowed by administrator or you need valid username/password to use this resource</h3></body></html>\r\n",
+	"<html><head><title>407 http Authentication Required</title></head>\r\n"
+	"<body><h2>407 http Authentication Required</h2><h3>Access to requested resource disallowed by administrator or you need valid username/password to use this resource</h3></body></html>\r\n",
 
 /* 8 */	"HTTP/1.0 200 Connection established\r\n\r\n",
 
@@ -88,21 +88,21 @@ char * proxy_stringtable[] = {
 	"<html><head><title>403 Access Denied</title></head>\r\n"
 	"<body><h2>403 Access Denied</h2><h3>Access control list denies you to access this resource</body></html>\r\n",
 
-/* 12*/	"HTTP/1.0 407 Proxy Authentication Required\r\n"
+/* 12*/	"HTTP/1.0 407 http Authentication Required\r\n"
 #ifndef NOCRYPT
-	"Proxy-Authenticate: NTLM\r\n"
+	"http-Authenticate: NTLM\r\n"
 #endif
-	"Proxy-Authenticate: Basic realm=\"proxy\"\r\n"
+	"http-Authenticate: Basic realm=\"http\"\r\n"
 	"Connection: close\r\n"
 	"Content-type: text/html; charset=utf-8\r\n"
 	"\r\n"
-	"<html><head><title>407 Proxy Authentication Required</title></head>\r\n"
-	"<body><h2>407 Proxy Authentication Required</h2><h3>Access to requested resource disallowed by administrator or you need valid username/password to use this resource</h3></body></html>\r\n",
+	"<html><head><title>407 http Authentication Required</title></head>\r\n"
+	"<body><h2>407 http Authentication Required</h2><h3>Access to requested resource disallowed by administrator or you need valid username/password to use this resource</h3></body></html>\r\n",
 
-/* 13*/	"HTTP/1.0 407 Proxy Authentication Required\r\n"
+/* 13*/	"HTTP/1.0 407 http Authentication Required\r\n"
 	"Connection: keep-alive\r\n"
 	"Content-Length: 0\r\n"
-	"Proxy-Authenticate: NTLM ",
+	"http-Authenticate: NTLM ",
 
 /* 14*/	"HTTP/1.0 403 Forbidden\r\n"
 	"Connection: close\r\n"
@@ -206,7 +206,7 @@ void file2url(unsigned char *sb, unsigned char *buf, unsigned bufsize, int * inb
 }
 
 
-void * proxychild(struct clientparam* param) {
+void * httpchild(struct clientparam* param) {
  int res=0, i=0;
  unsigned char* buf = NULL, *newbuf;
  int inbuf;
@@ -358,7 +358,7 @@ for(;;){
 	buf[inbuf+i]=0;
 /*printf("Got: %s\n", buf+inbuf);*/
 #ifndef WITHMAIN
-	if(i > 25 && !param->srv->transparent && (!strncasecmp((char *)(buf+inbuf), "proxy-authorization", 19))){
+	if(i > 25 && !param->srv->transparent && (!strncasecmp((char *)(buf+inbuf), "http-authorization", 19))){
 		sb = (unsigned char *)strchr((char *)(buf+inbuf), ':');
 		if(!sb)continue;
 		++sb;
@@ -404,8 +404,8 @@ for(;;){
 				if(param->password)myfree(param->password);
 				param->password = myalloc(32);
 				param->pwtype = 2;
-				i = (int)strlen(proxy_stringtable[13]);
-				memcpy(buf, proxy_stringtable[13], i);
+				i = (int)strlen(http_stringtable[13]);
+				memcpy(buf, http_stringtable[13], i);
 				genchallenge(param, (char *)param->password, (char *)buf + i);
 				memcpy(buf + strlen((char *)buf), "\r\n\r\n", 5);
 				socksend(param, param->clisock, buf, (int)strlen((char *)buf), conf.timeouts[STRING_S]);
@@ -432,7 +432,7 @@ for(;;){
 	}
 #endif
 	if(!isconnect && (
-			(i> 25 && !strncasecmp((char *)(buf+inbuf), "proxy-connection:", 17))
+			(i> 25 && !strncasecmp((char *)(buf+inbuf), "http-connection:", 17))
 			||
 			(i> 16 && (!strncasecmp((char *)(buf+inbuf), "connection:", 11)))
 			)){
@@ -448,7 +448,7 @@ for(;;){
 	}
 	if( i > 11 && !strncasecmp((char *)(buf+inbuf),  "Expect: 100", 11)){
 		keepalive = 1;
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[17], (int)strlen(proxy_stringtable[17]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[17], (int)strlen(http_stringtable[17]), conf.timeouts[STRING_S]);
 		continue;
 	}
 	if(param->transparent && i > 6 && !strncasecmp((char *)buf + inbuf, "Host:", 5)){
@@ -555,7 +555,7 @@ for(;;){
  param->nolongdatfilter = 0;
 
  if(isconnect && param->redirtype != R_HTTP) {
-	socksend(param, param->clisock, (unsigned char *)proxy_stringtable[8], (int)strlen(proxy_stringtable[8]), conf.timeouts[STRING_S]);
+	socksend(param, param->clisock, (unsigned char *)http_stringtable[8], (int)strlen(http_stringtable[8]), conf.timeouts[STRING_S]);
  }
 
  if (param->npredatfilters){
@@ -644,7 +644,7 @@ for(;;){
 	}
 	if(ftps == INVALID_SOCKET){RETURN(780);}
 	if(!mode){
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[8], (int)strlen(proxy_stringtable[8]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[8], (int)strlen(http_stringtable[8]), conf.timeouts[STRING_S]);
 		s = param->remsock;
 		param->remsock = ftps;
 		if((param->operation == FTP_PUT) && (contentlength64 > 0)) param->waitclient64 = contentlength64;
@@ -790,7 +790,7 @@ for(;;){
 			if((bufsize - inbuf) < LINESIZE){
 				if (bufsize > 20000){
 					if(!headsent++){
-						socksend(param, param->clisock, (unsigned char *)proxy_stringtable[9], (int)strlen(proxy_stringtable[9]), conf.timeouts[STRING_S]);
+						socksend(param, param->clisock, (unsigned char *)http_stringtable[9], (int)strlen(http_stringtable[9]), conf.timeouts[STRING_S]);
 					}
 					if((unsigned)socksend(param, param->clisock, buf, inbuf, conf.timeouts[STRING_S]) != inbuf){
 						RETURN(781);
@@ -894,7 +894,7 @@ for(;;){
 	sprintf((char*)buf+strlen((char *)buf), "Connection: %s\r\n", keepalive? "keep-alive":"close");
  }
  if(param->extusername){
-	sprintf((char*)buf + strlen((char *)buf), "%s: Basic ", (redirect)?"Proxy-Authorization":"Authorization");
+	sprintf((char*)buf + strlen((char *)buf), "%s: Basic ", (redirect)?"http-Authorization":"Authorization");
 	sprintf((char*)username, "%.128s:%.128s", param->extusername, param->extpassword?param->extpassword:(unsigned char*)"");
 	en64(username, buf+strlen((char *)buf), (int)strlen((char *)username));
 	sprintf((char*)buf + strlen((char *)buf), "\r\n");
@@ -932,7 +932,7 @@ for(;;){
  
  while( (i = sockgetlinebuf(param, SERVER, buf + inbuf, LINESIZE - 1, '\n', conf.timeouts[(res)?STRING_S:STRING_L])) > 2) {
 	if(!res && i>9)param->status = res = atoi((char *)buf + inbuf + 9);
-	if(((i >= 25 && !strncasecmp((char *)(buf+inbuf), "proxy-connection:", 17))
+	if(((i >= 25 && !strncasecmp((char *)(buf+inbuf), "http-connection:", 17))
 	   ||
 	    (i> 16 && !strncasecmp((char *)(buf+inbuf), "connection:", 11))
 			)){
@@ -943,7 +943,7 @@ for(;;){
 		if(strncasecmp((char *)sb,"keep-alive", 10))ckeepalive = 0;
 		if(!param->srv->transparent && res >= 200)continue; 
 	}
-	else if(i> 6 && !param->srv->transparent && (!strncasecmp((char *)(buf+inbuf), "proxy-", 6))){
+	else if(i> 6 && !param->srv->transparent && (!strncasecmp((char *)(buf+inbuf), "http-", 6))){
 		continue; 
 	}
 	else if(i> 6 && (!strncasecmp((char *)(buf+inbuf), "www-authenticate", 16))){
@@ -1042,8 +1042,8 @@ for(;;){
 #endif
  if(!isconnect || param->operation){
 	 if(authenticate && !param->transparent) sprintf((char*)buf+strlen((char *)buf), 
-		"Proxy-support: Session-Based-Authentication\r\n"
-		"Connection: Proxy-support\r\n"
+		"http-support: Session-Based-Authentication\r\n"
+		"Connection: http-support\r\n"
 	 );
 	 if(!param->srv->transparent && res>=200){
 		if(ckeepalive <= 1) sprintf((char*)buf+strlen((char *)buf), "Connection: %s\r\n", 
@@ -1123,41 +1123,41 @@ CLEANRET:
  if(param->res != 555 && param->res && param->clisock != INVALID_SOCKET && (param->res < 90 || param->res >=800 || param->res == 100 ||(param->res > 500 && param->res< 800))) {
 	if((param->res>=509 && param->res < 517) || param->res > 900) while( (i = sockgetlinebuf(param, CLIENT, buf, BUFSIZE - 1, '\n', conf.timeouts[STRING_S])) > 2);
 	if(param->res == 10) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[2], (int)strlen(proxy_stringtable[2]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[2], (int)strlen(http_stringtable[2]), conf.timeouts[STRING_S]);
 	}
 	else if (res == 700 || res == 701){
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[16], (int)strlen(proxy_stringtable[16]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[16], (int)strlen(http_stringtable[16]), conf.timeouts[STRING_S]);
 		socksend(param, param->clisock, (unsigned char *)ftpbuf, inftpbuf, conf.timeouts[STRING_S]);
 	}
 	else if(param->res == 100 || (param->res >10 && param->res < 20) || (param->res >701 && param->res <= 705)) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[1], (int)strlen(proxy_stringtable[1]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[1], (int)strlen(http_stringtable[1]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res >=20 && param->res < 30) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[6], (int)strlen(proxy_stringtable[6]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[6], (int)strlen(http_stringtable[6]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res >=30 && param->res < 80) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[5], (int)strlen(proxy_stringtable[5]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[5], (int)strlen(http_stringtable[5]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res == 1 || (!param->srv->needuser && param->res < 10)) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[11], (int)strlen(proxy_stringtable[11]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[11], (int)strlen(http_stringtable[11]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res < 10) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[param->srv->usentlm?12:7], (int)strlen(proxy_stringtable[param->srv->usentlm?12:7]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[param->srv->usentlm?12:7], (int)strlen(http_stringtable[param->srv->usentlm?12:7]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res == 999) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[4], (int)strlen(proxy_stringtable[4]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[4], (int)strlen(http_stringtable[4]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res == 519) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[3], (int)strlen(proxy_stringtable[3]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[3], (int)strlen(http_stringtable[3]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res == 517) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[15], (int)strlen(proxy_stringtable[15]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[15], (int)strlen(http_stringtable[15]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res == 780) {
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[10], (int)strlen(proxy_stringtable[10]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[10], (int)strlen(http_stringtable[10]), conf.timeouts[STRING_S]);
 	}
 	else if(param->res >= 511 && param->res<=516){
-		socksend(param, param->clisock, (unsigned char *)proxy_stringtable[0], (int)strlen(proxy_stringtable[0]), conf.timeouts[STRING_S]);
+		socksend(param, param->clisock, (unsigned char *)http_stringtable[0], (int)strlen(http_stringtable[0]), conf.timeouts[STRING_S]);
 	}
  } 
  logurl(param, (char *)buf, (char *)req, ftp);
@@ -1169,13 +1169,13 @@ CLEANRET:
 }
 
 #ifdef WITHMAIN
-struct proxydef childdef = {
-	proxychild,
+struct httpdef childdef = {
+	httpchild,
 	3128,
 	0,
-	S_PROXY,
-	"-a - anonymous proxy\r\n"
-	"-a1 - anonymous proxy with random client IP spoofing\r\n"
+	S_http,
+	"-a - anonymous http\r\n"
+	"-a1 - anonymous http with random client IP spoofing\r\n"
 };
-#include "proxymain.c"
+#include "httpmain.c"
 #endif

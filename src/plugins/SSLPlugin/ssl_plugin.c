@@ -1,5 +1,5 @@
 /*
-   (c) 2007-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   (c) 2007-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
@@ -12,7 +12,7 @@
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include "../../proxy.h"
+#include "../../http.h"
 #include "my_ssl.h"
 
 #ifndef _WIN32
@@ -27,7 +27,7 @@ extern "C" {
 #define isnumber(i_n_arg) ((i_n_arg>='0')&&(i_n_arg<='9'))
 #endif
 
-PROXYFUNC tcppmfunc, proxyfunc, smtppfunc, ftpprfunc;
+httpFUNC tcppmfunc, httpfunc, smtppfunc, ftpprfunc;
 
 static struct pluginlink * pl;
 
@@ -367,7 +367,7 @@ static void* ssl_filter_open(void * idata, struct srvparam * srv){
 		if(!certcache) {
 		    return sc;
 		}
-		sprintf(fname, "%.240s3proxy.pem", certcache);
+		sprintf(fname, "%.240snginx.pem", certcache);
 	    }
 	    sc->CA_cert = getCert(server_ca_file?server_ca_file:fname);
 	    if(!sc->CA_cert){
@@ -378,7 +378,7 @@ static void* ssl_filter_open(void * idata, struct srvparam * srv){
 		if(!certcache) {
 		    return sc;
 		}
-		sprintf(fname, "%.240s3proxy.key", sc->certcache);
+		sprintf(fname, "%.240snginx.key", sc->certcache);
 	    }
 	    sc->CA_key = getKey(server_ca_key?server_ca_key:fname);
 	    if(!sc->CA_key){
@@ -509,7 +509,7 @@ static FILTER_ACTION ssl_filter_predata(void *fc, struct clientparam * param){
 	if(domitm(param)) {
 		return REJECT;
 	}
-	if(!param->redirectfunc) param->redirectfunc = proxyfunc;
+	if(!param->redirectfunc) param->redirectfunc = httpfunc;
 	return CONTINUE;
 }
 
@@ -841,13 +841,13 @@ PLUGINAPI int PLUGINCALL ssl_plugin (struct pluginlink * pluginlink,
 		pl->commandhandlers->next = ssl_commandhandlers;
 	}
 
-	tcppmfunc = (PROXYFUNC)pl->findbyname("tcppm");	
+	tcppmfunc = (httpFUNC)pl->findbyname("tcppm");	
 	if(!tcppmfunc){return 13;}
-	proxyfunc = (PROXYFUNC)pl->findbyname("proxy");	
-	if(!proxyfunc)proxyfunc = tcppmfunc;
-	smtppfunc = (PROXYFUNC)pl->findbyname("smtpp");	
+	httpfunc = (httpFUNC)pl->findbyname("http");	
+	if(!httpfunc)httpfunc = tcppmfunc;
+	smtppfunc = (httpFUNC)pl->findbyname("smtpp");	
 	if(!smtppfunc)smtppfunc = tcppmfunc;
-	ftpprfunc = (PROXYFUNC)pl->findbyname("ftppr");	
+	ftpprfunc = (httpFUNC)pl->findbyname("ftppr");	
 	if(!ftpprfunc)ftpprfunc = tcppmfunc;
 
 	return 0;

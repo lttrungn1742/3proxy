@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 #ifndef PORTMAP
 #define PORTMAP
@@ -281,12 +281,12 @@ CLEANRET:
 }
 
 #ifdef WITHMAIN
-struct proxydef childdef = {
+struct httpdef childdef = {
 	tlsprchild,
 	1443,
 	0,
 	S_TLSPR,
 	""
 };
-#include "proxymain.c"
+#include "httpmain.c"
 #endif

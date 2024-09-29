@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 #ifndef _WIN32
 #include <sys/resource.h>
 #include <pwd.h>
@@ -36,7 +36,7 @@ struct counter_record crecord;
 
 int mainfunc (int argc, char** argv);
 
-struct proxydef childdef = {NULL, 0, 0, S_NOSERVICE, ""};
+struct httpdef childdef = {NULL, 0, 0, S_NOSERVICE, ""};
 
 #define STRINGBUF 65535
 #define NPARAMS	  4096
@@ -145,7 +145,7 @@ unsigned char * dologname (unsigned char *buf, unsigned char *name, const unsign
 	return buf;
 }
 
-int start_proxy_thread(struct child * chp){
+int start_http_thread(struct child * chp){
   pthread_t thread;
 #ifdef _WIN32
   HANDLE h;
@@ -174,20 +174,20 @@ int start_proxy_thread(struct child * chp){
 	return 0;
 }
 
-static int h_proxy(int argc, unsigned char ** argv){
+static int h_http(int argc, unsigned char ** argv){
   struct child ch;
 
 	ch.argc = argc;
 	ch.argv = argv;
 	if(!strcmp((char *)argv[0], "proxy")) {
-		childdef.pf = proxychild;
+		childdef.pf = httpchild;
 		childdef.port = 3128;
 		childdef.isudp = 0;
-		childdef.service = S_PROXY;
+		childdef.service = S_http;
 		childdef.helpmessage = " -n - no NTLM support\n";
 #ifdef NOIPV6
 		if(!resolvfunc || (resolvfunc == myresolver && !dns_table.hashsize)){
-			fprintf(stderr, "[line %d] Warning: no nserver/nscache configured, proxy may run very slow\n", linenum);
+			fprintf(stderr, "[line %d] Warning: no nserver/nscache configured, http may run very slow\n", linenum);
 		}
 #endif
 	}
@@ -263,14 +263,14 @@ static int h_proxy(int argc, unsigned char ** argv){
 		childdef.port = 53;
 		childdef.isudp = 1;
 		childdef.service = S_DNSPR;
-		childdef.helpmessage = " -s - simple DNS forwarding - do not use 3proxy resolver / name cache\n";
+		childdef.helpmessage = " -s - simple DNS forwarding - do not use nginx resolver / name cache\n";
 #ifndef NOIPV6
 		if(!resolvfunc || (resolvfunc == myresolver && !dns_table.hashsize) || resolvfunc == fakeresolver){
 			fprintf(stderr, "[line %d] Warning: no nserver/nscache configured, dnspr will not work as expected\n", linenum);
 		}
 #endif
 	}
-	return start_proxy_thread(&ch);
+	return start_http_thread(&ch);
 }
 
 static int h_internal(int argc, unsigned char ** argv){
@@ -1562,14 +1562,14 @@ struct commands specificcommands[]={
 
 struct commands commandhandlers[]={
 	{commandhandlers+1,  "", h_noop, 1, 0},
-	{commandhandlers+2,  "proxy", h_proxy, 1, 0},
-	{commandhandlers+3,  "pop3p", h_proxy, 1, 0},
-	{commandhandlers+4,  "ftppr", h_proxy, 1, 0},
-	{commandhandlers+5,  "socks", h_proxy, 1, 0},
-	{commandhandlers+6,  "tcppm", h_proxy, 4, 0},
-	{commandhandlers+7,  "udppm", h_proxy, 4, 0},
-	{commandhandlers+8,  "admin", h_proxy, 1, 0},
-	{commandhandlers+9,  "dnspr", h_proxy, 1, 0},
+	{commandhandlers+2,  "http", h_http, 1, 0},
+	{commandhandlers+3,  "pop3p", h_http, 1, 0},
+	{commandhandlers+4,  "ftppr", h_http, 1, 0},
+	{commandhandlers+5,  "socks", h_http, 1, 0},
+	{commandhandlers+6,  "tcppm", h_http, 4, 0},
+	{commandhandlers+7,  "udppm", h_http, 4, 0},
+	{commandhandlers+8,  "admin", h_http, 1, 0},
+	{commandhandlers+9,  "dnspr", h_http, 1, 0},
 	{commandhandlers+10,  "internal", h_internal, 2, 2},
 	{commandhandlers+11, "external", h_external, 2, 2},
 	{commandhandlers+12, "log", h_log, 1, 0},
@@ -1617,16 +1617,16 @@ struct commands commandhandlers[]={
 	{commandhandlers+54, "nolog", h_nolog, 1, 1},
 	{commandhandlers+55, "weight", h_nolog, 2, 2},
 	{commandhandlers+56, "authcache", h_authcache, 2, 3},
-	{commandhandlers+57, "smtpp", h_proxy, 1, 0},
+	{commandhandlers+57, "smtpp", h_http, 1, 0},
 	{commandhandlers+58, "delimchar",h_delimchar, 2, 2},
 	{commandhandlers+59, "authnserver", h_authnserver, 2, 2},
 	{commandhandlers+60, "stacksize", h_stacksize, 2, 2},
 	{commandhandlers+61, "force", h_force, 1, 1},
 	{commandhandlers+62, "noforce", h_noforce, 1, 1},
 	{commandhandlers+63, "parentretries", h_parentretries, 2, 2},
-	{commandhandlers+64,  "auto", h_proxy, 1, 0},
+	{commandhandlers+64,  "auto", h_http, 1, 0},
 	{commandhandlers+65, "backlog", h_backlog, 2, 2},
-	{commandhandlers+66,  "tlspr", h_proxy, 1, 0},
+	{commandhandlers+66,  "tlspr", h_http, 1, 0},
 #ifndef NORADIUS
 	{commandhandlers+67, "radius", h_radius, 3, 0},
 #endif

@@ -1,5 +1,5 @@
 /*
-   (c) 2007-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   (c) 2007-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
@@ -56,7 +56,7 @@ static int timeo = 0;
 
 static char * fp_stringtable[] = {
 /* 0 */	"HTTP/1.0 503 Service Unavailable\r\n"
-	"Proxy-Connection: close\r\n"
+	"http-Connection: close\r\n"
 	"Content-type: text/html; charset=us-ascii\r\n"
 	"\r\n"
 	"<html><head><title>503 Service Unavailable</title></head>\r\n"
@@ -762,7 +762,7 @@ static FILTER_ACTION fp_client(void *fo, struct clientparam * param, void** fc){
 }
 
 static FILTER_ACTION fp_request(void *fc, struct clientparam * param, unsigned char ** buf_p, int * bufsize_p, int offset, int * length_p){
-	if(fc && (param->service == S_PROXY)){
+	if(fc && (param->service == S_http)){
 		if(FC->state) {
 			closefiles(FC);
 			FC->state = 0;
@@ -794,7 +794,7 @@ static FILTER_ACTION fp_hcli(void *fc, struct clientparam * param, unsigned char
 }
 
 static FILTER_ACTION fp_hsrv(void *fc, struct clientparam * param, unsigned char ** buf_p, int * bufsize_p, int offset, int * length_p){
-	if(fc && param->service == S_PROXY && (FC->state == GOT_HTTP_REQUEST || FC->state == GOT_HTTP_CLI_HDR || FC->state == GOT_HTTP_CLIDATA)){
+	if(fc && param->service == S_http && (FC->state == GOT_HTTP_REQUEST || FC->state == GOT_HTTP_CLI_HDR || FC->state == GOT_HTTP_CLIDATA)){
 		if(FC->what & FP_SRVHEADER) initserverfile(FC);
 		FC->state = GOT_HTTP_SRV_HDR;
 

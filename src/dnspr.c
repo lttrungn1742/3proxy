@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 #ifndef UDP
 #define UDP
@@ -124,7 +124,7 @@ void * dnsprchild(struct clientparam* param) {
 		memcpy(buf + len + 6, &ttl, 4);
 		buf[len+11] = 7;
 		buf[len+12] = 6;
-		memcpy(buf+len+13,(void *)"3proxy",6);
+		memcpy(buf+len+13,(void *)"nginx",6);
 		len+=20;
 	}
 	else ip = 0;

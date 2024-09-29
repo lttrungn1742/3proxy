@@ -61,7 +61,7 @@ int savecounters(void)
  unsigned char *tmpbuf,pat_file[]="%s%s.lc";
 
 
- /* timetoexit !=0 - будем завершаться.*/
+ /* timetoexit !=0 - пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.*/
  while (tc != NULL) 
   {
     tcd = tc;
@@ -101,7 +101,7 @@ static int ldapfunc(struct clientparam *param)
   int    rc = -1;
   char   tmpbuf[1024];
 
-  /* test proxy user auth ------------------------*/
+  /* test http user auth ------------------------*/
   if(!param->username || !param->password) return 4;
   if(strlen(param->password)==0) return 4;
    
@@ -542,7 +542,7 @@ PLUGINAPI int PLUGINCALL start(struct pluginlink * pluginlink,
     ldap_attrsgroup_handler.next = pluginlink->commandhandlers->next;
     pluginlink->commandhandlers->next = &ldap_attrsgroup_handler;
 
-    /* add command: ldapdircount c:\3proxy\ */
+    /* add command: ldapdircount c:\nginx\ */
     ldap_dircount_handler.minargs = 2; 
     ldap_dircount_handler.maxargs = 2;
     ldap_dircount_handler.command = "ldapdircount";

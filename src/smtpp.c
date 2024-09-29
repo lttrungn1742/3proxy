@@ -1,16 +1,16 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 #define RETURN(xxx) { param->res = xxx; goto CLEANRET; }
 
-char  ehlo[] = 	"250-Proxy\r\n"
+char  ehlo[] = 	"250-http\r\n"
 		"250-AUTH PLAIN LOGIN\r\n"
 		"250-8BITMIME\r\n"
 		"250 DSN\r\n";
@@ -101,15 +101,15 @@ void * smtppchild(struct clientparam* param) {
  char * command = NULL;
  int login = 0;
 
- if(socksend(param, param->clisock, (unsigned char *)"220 Proxy\r\n", 11, conf.timeouts[STRING_S])!=11) {RETURN (611);}
+ if(socksend(param, param->clisock, (unsigned char *)"220 http\r\n", 11, conf.timeouts[STRING_S])!=11) {RETURN (611);}
  i = sockgetlinebuf(param, CLIENT, buf, sizeof(buf) - 10, '\n', conf.timeouts[STRING_S]);
  while(i > 4 && (strncasecmp((char *)buf, "AUTH PLAIN", 10) || !(login = 2)) && (strncasecmp((char *)buf, "AUTH LOGIN", 10) || !(login = 1))){
 	if(!strncasecmp((char *)buf, "QUIT", 4)){
-		socksend(param, param->clisock, (unsigned char *)"221 Proxy\r\n", 11,conf.timeouts[STRING_S]);	
+		socksend(param, param->clisock, (unsigned char *)"221 http\r\n", 11,conf.timeouts[STRING_S]);	
 		RETURN(0);
 	}
 	else if(!strncasecmp((char *)buf, "HELO ", 5)){
-		socksend(param, param->clisock, (unsigned char *)"250 Proxy\r\n", 11,conf.timeouts[STRING_S]);	
+		socksend(param, param->clisock, (unsigned char *)"250 http\r\n", 11,conf.timeouts[STRING_S]);	
 	}
 	else if(!strncasecmp((char *)buf, "EHLO ", 5)){
 		socksend(param, param->clisock, (unsigned char *)ehlo, sizeof(ehlo) - 1,conf.timeouts[STRING_S]);	
@@ -185,7 +185,7 @@ void * smtppchild(struct clientparam* param) {
  } while (i > 3 && buf[3] == '-');
  if( i < 3 ) {RETURN(671);}
  buf[i] = 0;
- if(strncasecmp((char *)buf, "220", 3)||!strncasecmp((char *)buf+4, "PROXY", 5)){RETURN(672);}
+ if(strncasecmp((char *)buf, "220", 3)||!strncasecmp((char *)buf+4, "http", 5)){RETURN(672);}
  i = sprintf((char *)buf, "EHLO [");
  i += myinet_ntop(*SAFAMILY(&param->sinsl), SAADDR(&param->sinsl), (char *)buf+strlen((char *)buf), 64);
  i += sprintf((char *)buf+strlen((char *)buf), "]\r\n");
@@ -304,7 +304,7 @@ CLEANRET:
 }
 
 #ifdef WITHMAIN
-struct proxydef childdef = {
+struct httpdef childdef = {
 	smtppchild,
 	25,
 	0,
@@ -312,5 +312,5 @@ struct proxydef childdef = {
 	" -hdefault_host[:port] - use this host and port as default if no host specified\n"
 
 };
-#include "proxymain.c"
+#include "httpmain.c"
 #endif

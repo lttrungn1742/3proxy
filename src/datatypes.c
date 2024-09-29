@@ -1,11 +1,11 @@
 /*
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 static void pr_unsigned64(struct node *node, CBFUNC cbf, void*cb){
 	char buf[32];

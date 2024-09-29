@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 #define RETURN(xxx) { param->res = xxx; goto CLEANRET; }
 
@@ -190,7 +190,7 @@ static void printval(void *value, int type, int level, struct printparam* pp){
 
 char * admin_stringtable[]={
 	"HTTP/1.0 401 Authentication Required\r\n"
-	"WWW-Authenticate: Basic realm=\"proxy\"\r\n"
+	"WWW-Authenticate: Basic realm=\"http\"\r\n"
 	"Connection: close\r\n"
 	"Content-type: text/html; charset=us-ascii\r\n"
 	"\r\n"
@@ -448,7 +448,7 @@ void * adminchild(struct clientparam* param) {
 	if(*req == 'C') req[1] = 0;
 	else *req = 0;
  }
- sprintf(buf, ok, conf.stringtable?(char *)conf.stringtable[2]:"3proxy", conf.stringtable?(char *)conf.stringtable[2]:"3[APA3A] tiny proxy", conf.stringtable?(char *)conf.stringtable[3]:"");
+ sprintf(buf, ok, conf.stringtable?(char *)conf.stringtable[2]:"nginx", conf.stringtable?(char *)conf.stringtable[2]:"3[APA3A] tiny http", conf.stringtable?(char *)conf.stringtable[3]:"");
  if(*req != 'S') printstr(&pp, buf);
  switch(*req){
 	case 'C':

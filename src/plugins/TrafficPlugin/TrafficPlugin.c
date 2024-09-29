@@ -1,16 +1,16 @@
 /*
-	3proxy Traffic correct plugin v0.1 beta
+	nginx Traffic correct plugin v0.1 beta
 	
-	Написал Maslov Michael aka Flexx(rus)
-	Формула расчёта траффика по размеру пакета by 3APA3A
+	пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Maslov Michael aka Flexx(rus)
+	пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ by 3APA3A
 	email: flexx_rus@mail.ru
 	ICQ: 299132764
-	http://3proxy.ru/
+	http://nginx.ru/
 
-	Как работает не знаю (многое зависит от ваших настроек). Никаких гарантий.
-	С плугином можете делать всё, что захочется.
-	Дожен распростроняться только с исходными кодами или вместе с 3proxy.
-	Удалять данный Copyright запрещено.
+	пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ). пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+	пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+	пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅnginxпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ 3http.
+	пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Copyright пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 */
 
 #include "../../structures.h"
@@ -33,8 +33,8 @@ struct commands * commandhandlers;
 struct pluginlink * pl;
 
 typedef enum {
-	MULTIPLAY, /* метод коррекции умножением на коффициент */
-	IPCORRECT, /* метод коррекции с учётом размера пакета */
+	MULTIPLAY, /* пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
+	IPCORRECT, /* пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ */
 } TRAFCORRECT_TYPE;
 
 typedef enum {
@@ -46,7 +46,7 @@ struct trafcorrect {
 	struct trafcorrect * next;
 	TRAFCORRECT_TYPE type;
 	int port;
-	PROXYSERVICE p_service;
+	httpSERVICE p_service;
 	double coeff;
 	CONN_TYPE con_type;
 	int psize;
@@ -84,7 +84,7 @@ int h_trafcorrect(int argc, unsigned char ** argv) {
 	 	if(DBGLEVEL == 1)fprintf(stdout, "See documentation of traffic correct plugin.\n");
 		return 1;
 	}
-	/* режим умножения траффика на коэффициент */
+	/* пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 	if (!strcmp((char *)argv[1], "m")) {
 		struct trafcorrect * newitem;
 		if (argc < 5) {
@@ -99,7 +99,7 @@ int h_trafcorrect(int argc, unsigned char ** argv) {
 		newitem->type = MULTIPLAY;
 
 		newitem->p_service = S_NOSERVICE;
-		if (!strcmp((char *)argv[2], (char *)"proxy")) newitem->p_service = S_PROXY;
+		if (!strcmp((char *)argv[2], (char *)"http")) newitem->p_service = S_http;
 		if (!strcmp((char *)argv[2], (char *)"socks4")) newitem->p_service = S_SOCKS4;
 		if (!strcmp((char *)argv[2], (char *)"socks45")) newitem->p_service = S_SOCKS45;
 		if (!strcmp((char *)argv[2], (char *)"socks5")) newitem->p_service = S_SOCKS5;
@@ -110,7 +110,7 @@ int h_trafcorrect(int argc, unsigned char ** argv) {
 
    	    newitem->port = atoi((char *)argv[3]);
 		newitem->coeff = atof((char *)argv[4]);
-		/* проверка на корректность ввода */
+		/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
 		if ((newitem->port>65535) || (newitem->coeff<=0) || (newitem->coeff>100)) {
 			free(newitem);
 			if(DBGLEVEL == 1)fprintf(stdout, "Port must be 0<p<65535 and coefficient must be 0<c<100.\n");
@@ -119,7 +119,7 @@ int h_trafcorrect(int argc, unsigned char ** argv) {
 		addtrafcorrect(newitem);
 		return 0;
 	}
-	/* режим учёта входящих и исходящих пакетов */
+	/* пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 	if (!strcmp((char *)argv[1], "p")) {
 		struct trafcorrect * newitem;
 		if (argc < 5) {
@@ -135,7 +135,7 @@ int h_trafcorrect(int argc, unsigned char ** argv) {
 		newitem->type = IPCORRECT;
 
 		newitem->p_service = S_NOSERVICE;
-		if (!strstr((char *)argv[2], "proxy")) newitem->p_service = S_PROXY;
+		if (!strstr((char *)argv[2], "http")) newitem->p_service = S_http;
 		if (!strstr((char *)argv[2], "socks4")) newitem->p_service = S_SOCKS4;
 		if (!strstr((char *)argv[2], "socks45")) newitem->p_service = S_SOCKS45;
 		if (!strstr((char *)argv[2], "socks5")) newitem->p_service = S_SOCKS5;
@@ -146,13 +146,13 @@ int h_trafcorrect(int argc, unsigned char ** argv) {
 		
 		newitem->con_type = TCP;
 		newitem->psize = 52;
-		if ((!strcmp((char *)argv[3], "udp")) && (newitem->p_service != S_PROXY) && (newitem->p_service != S_TCPPM) && (newitem->p_service != S_POP3P)) {
+		if ((!strcmp((char *)argv[3], "udp")) && (newitem->p_service != S_http) && (newitem->p_service != S_TCPPM) && (newitem->p_service != S_POP3P)) {
 			newitem->con_type = UDP;
 			newitem->psize = 48;
 		}
 		
 		newitem->port = atoi((char *)argv[4]);
-		/* последний необязательный параметр - размер пакета */
+		/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ */
 		if (argc >= 6) {
 			newitem->psize = atoi((char *)argv[5]);
 		}
@@ -175,7 +175,7 @@ static unsigned short myhtons(unsigned short port) {
 
 LOGFUNC origlogfunc;
 void mylogfunc(struct clientparam * param, const unsigned char * pz) {
-	PROXYSERVICE g_s = S_NOSERVICE;
+	httpSERVICE g_s = S_NOSERVICE;
 	int port;
 	int rule = 0;
 	struct trafcorrect * starttrafcorrect = firsttrafcorrect;
@@ -207,8 +207,8 @@ void mylogfunc(struct clientparam * param, const unsigned char * pz) {
 				 (param->operation == ICMPASSOC))
 			   )||(starttrafcorrect->type == TCP))) /* TCP support */
 		{
-				/* фильтр подошёл. можно изменять значение траффика
-				   домножаем на число */
+				/* пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+				   пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ */
 				if (starttrafcorrect->type == MULTIPLAY) {
 #ifndef NOPSTDINT
 					param->statssrv64 = (unsigned)((double)param->statssrv64 *starttrafcorrect->coeff);
@@ -218,7 +218,7 @@ void mylogfunc(struct clientparam * param, const unsigned char * pz) {
 					param->statscli = (unsigned)((double)param->statscli * starttrafcorrect->coeff);
 #endif
 				}
-				/* с учётом пакетов */
+				/* пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 				if (starttrafcorrect->type == IPCORRECT) {
 					if (starttrafcorrect->con_type == TCP) {
 #ifndef NOPSTDINT
@@ -294,7 +294,7 @@ PLUGINAPI int PLUGINCALL start(struct pluginlink * pluginlink, int argc, char** 
 		return 0;
 	}
 	already_loaded = 1;
-	/* добавляем команду "trafcorrect" */
+	/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ "trafcorrect" */
 	starthandler = commandhandlers;
 	for ( ; starthandler->next; starthandler = starthandler->next);
 	trafcorrect_handler.next = NULL;
@@ -304,7 +304,7 @@ PLUGINAPI int PLUGINCALL start(struct pluginlink * pluginlink, int argc, char** 
 	trafcorrect_handler.handler = h_trafcorrect;
 	starthandler->next = &trafcorrect_handler;
 	
-	/* подменяем conf->logfunc, с целью контролировать траффик */
+	/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ conf->logfunc, пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 	origlogfunc = conf->logfunc;
 	conf->logfunc = mylogfunc;
 	return 0;

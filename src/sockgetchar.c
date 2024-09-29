@@ -1,11 +1,11 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 */
 
-#include "proxy.h"
+#include "http.h"
 
 int socksend(struct clientparam *param, SOCKET sock, unsigned char * buf, int bufsize, int to){
  int sent = 0;

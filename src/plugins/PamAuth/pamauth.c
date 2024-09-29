@@ -1,4 +1,4 @@
-/* plugin for 3proxy with PAM auth only for *NIX (linux,*bsd)
+/* plugin for nginx with PAM auth only for *NIX (linux,*bsd)
 Kirill Lopuchov <lopuchov@mail.ru>
 
    Compile with: gcc -shared -o pamauth.so pamauth.c -lpam  -DNOODBC
@@ -77,7 +77,7 @@ static int pamfunc(struct clientparam *param)
         &password_conversation,
         NULL };
 
-  /* test proxy user auth ------------------------*/
+  /* test http user auth ------------------------*/
   if(!param->username || !param->password) return 4;
   /*if(strlen(param->password)==0) return 4;*/
 
@@ -92,7 +92,7 @@ static int pamfunc(struct clientparam *param)
   pthread_mutex_lock(&pam_mutex);
   if (!pamh)
     {
-	retval = pam_start ((char *)service, "3proxy@" , &conv, &pamh);
+	retval = pam_start ((char *)service, "nginx@" , &conv, &pamh);
     }
    if (retval == PAM_SUCCESS)
        retval = pam_set_item (pamh, PAM_USER, param->username); 

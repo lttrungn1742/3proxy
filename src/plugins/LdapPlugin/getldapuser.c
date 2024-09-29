@@ -1,10 +1,10 @@
-/* Create list user for 3proxy ACL from LDAP server 
+/* Create list user for nginx ACL from LDAP server 
  (c) Kirill Lopuchov lopuchov@mail.ru
 */
 #include <stdio.h>
 #include <ldap.h>
 
-/*Create list user for 3proxy ACL from LDAP server*/
+/*Create list user for nginx ACL from LDAP server*/
 
 /* argv[1] = server
    argv[2] = basedn
@@ -31,7 +31,7 @@ main(int argc, char *argv[])
 
  if ( argc < 6 )
   {
-   printf ("Create 3proxy ACL userlist from ldap server.\ngetldapuser < ldapserver sbasedn user_attribute filter user password > \n");
+   printf ("Create nginx ACL userlist from ldap server.\ngetldapuser < ldapserver sbasedn user_attribute filter user password > \n");
    printf ("Example: getldapuser 192.168.0.1 dc=domain,dc=com cn (memberOf=cn=internet,cn=Users,dc=domain,dc=com) cn=admin,cn=users,dc=domain,dc=com password  \n");
   }
  

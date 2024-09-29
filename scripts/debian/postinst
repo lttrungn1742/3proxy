@@ -1,43 +1,43 @@
-if [ ! -f /usr/local/3proxy/conf/passwd ]; then \
- touch /usr/local/3proxy/conf/passwd;\
+if [ ! -f /usr/local/nginx/conf/passwd ]; then \
+ touch /usr/local/nginx/conf/passwd;\
 fi
-chown -R proxy:proxy /usr/local/3proxy
-chmod 550  /usr/local/3proxy/
-chmod 550  /usr/local/3proxy/conf/
-chmod 440  /usr/local/3proxy/conf/*
+chown -R http:http /usr/local/nginx
+chmod 550  /usr/local/nginx/
+chmod 550  /usr/local/nginx/conf/
+chmod 440  /usr/local/nginx/conf/*
 if /bin/systemctl >/dev/null 2>&1; then \
- /usr/sbin/update-rc.d 3proxy disable || true; \
- /usr/sbin/chkconfig 3proxy off || true; \
- /bin/systemctl enable 3proxy.service; \
+ /usr/sbin/update-rc.d nginx disable || true; \
+ /usr/sbin/chkconfig nginx off || true; \
+ /bin/systemctl enable nginx.service; \
 elif [ -x /usr/sbin/update-rc.d ]; then \
- /usr/sbin/update-rc.d 3proxy defaults; \
- /usr/sbin/update-rc.d 3proxy enable; \
+ /usr/sbin/update-rc.d nginx defaults; \
+ /usr/sbin/update-rc.d nginx enable; \
 elif [ -x /usr/sbin/chkconfig ]; then \
- /usr/sbin/chkconfig 3proxy on; \
+ /usr/sbin/chkconfig nginx on; \
 fi
 
 echo ""
-echo 3proxy installed.
+echo nginx installed.
 if /bin/systemctl >/dev/null 2>&1; then \
- /bin/systemctl stop 3proxy.service \
- /bin/systemctl start 3proxy.service \
+ /bin/systemctl stop nginx.service \
+ /bin/systemctl start nginx.service \
  echo use ;\
- echo "  "systemctl start 3proxy.service ;\
- echo to start proxy ;\
- echo "  "systemctl stop 3proxy.service ;\
- echo to stop proxy ;\
+ echo "  "systemctl start nginx.service ;\
+ echo to start http ;\
+ echo "  "systemctl stop nginx.service ;\
+ echo to stop http ;\
 elif [ -x /usr/sbin/service ]; then \
- /usr/sbin/service 3proxy stop  || true;\
- /usr/sbin/service 3proxy start  || true;\
- echo "  "service 3proxy start ;\
- echo to start proxy ;\
- echo "  "service 3proxy stop ;\
- echo to stop proxy ;\
+ /usr/sbin/service nginx stop  || true;\
+ /usr/sbin/service nginx start  || true;\
+ echo "  "service nginx start ;\
+ echo to start http ;\
+ echo "  "service nginx stop ;\
+ echo to stop http ;\
 fi
-echo "  "/usr/local/3proxy/conf/add3proxyuser.sh
+echo "  "/usr/local/nginx/conf/addnginxuser.sh
 echo to add users
 echo ""
 echo Default config uses Google\'s DNS.
 echo It\'s recommended to use provider supplied DNS or install local recursor, e.g. pdns-recursor.
-echo Configure preferred DNS in /usr/local/3proxy/conf/3proxy.cfg.
-echo run \'/usr/local/3proxy/conf/add3proxyuser.sh admin password\' to configure \'admin\' user
+echo Configure preferred DNS in /usr/local/nginx/conf/nginx.cfg.
+echo run \'/usr/local/nginx/conf/addnginxuser.sh admin password\' to configure \'admin\' user

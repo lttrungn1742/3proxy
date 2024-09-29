@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 #define param ((struct clientparam *) p)
 #ifdef _WIN32
@@ -239,8 +239,8 @@ int MODULEMAINFUNC (int argc, char** argv){
 	"\n"
 	" -iIP ip address or internal interface (clients are expected to connect)\n"
 	" -eIP ip address or external interface (outgoing connection will have this)\n"
-	" -rHOST:PORT Use IP:port for connect back proxy instead of listen port\n"
-	" -RHOST:PORT Use PORT to listen connect back proxy connection to pass data to\n"
+	" -rHOST:PORT Use IP:port for connect back http instead of listen port\n"
+	" -RHOST:PORT Use PORT to listen connect back http connection to pass data to\n"
 	" -4 Use IPv4 for outgoing connections\n"
 	" -6 Use IPv6 for outgoing connections\n"
 	" -46 Prefer IPv4 for outgoing connections, use both IPv4 and IPv6\n"

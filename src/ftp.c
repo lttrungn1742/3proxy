@@ -1,11 +1,11 @@
 /*
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
  */
 
-#include "proxy.h"
+#include "http.h"
 
 
 int ftplogin(struct clientparam *param, char *nbuf, int *innbuf) {
@@ -44,7 +44,7 @@ int ftplogin(struct clientparam *param, char *nbuf, int *innbuf) {
 			param->extusername?
 				(param->extpassword?
 					param->extpassword:(unsigned char *)"")
-				:(unsigned char *)"3proxy@");
+				:(unsigned char *)"nginx@");
 		res = (int)strlen(buf);
 		if((int)socksend(param, param->remsock, (unsigned char *)buf, res, conf.timeouts[STRING_S]) != (int)strlen(buf)){
 			return 705;

@@ -1,0 +1,4 @@
+#!/bin/nginx
+#daemon
+chroot /usr/local/nginx http http
+include /conf/nginx.cfg

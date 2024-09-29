@@ -1,13 +1,13 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2000-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2000-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
 #ifndef NORADIUS
-#include "proxy.h"
+#include "http.h"
 #include "libs/md5.h"
 
 #define AUTH_VECTOR_LEN         16
@@ -60,7 +60,7 @@
 #define PW_CALLED_STATION_ID		30
 #define PW_CALLING_STATION_ID		31
 #define PW_NAS_IDENTIFIER		32
-#define PW_PROXY_STATE			33
+#define PW_http_STATE			33
 
 #define PW_ACCT_STATUS_TYPE		40
 #define PW_ACCT_DELAY_TIME		41
@@ -126,7 +126,7 @@
 #define PW_REALM			1045
 #define PW_NO_SUCH_ATTRIBUTE		1046
 #define PW_PACKET_TYPE			1047
-#define PW_PROXY_TO_REALM      		1048
+#define PW_http_TO_REALM      		1048
 #define PW_REPLICATE_TO_REALM  		1049
 #define PW_ACCT_SESSION_START_TIME	1050
 #define PW_ACCT_UNIQUE_SESSION_ID	1051

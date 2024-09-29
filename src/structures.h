@@ -1,6 +1,6 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
@@ -169,7 +169,7 @@ typedef enum {
 
 typedef enum {
 	S_NOSERVICE = 0,
-	S_PROXY,
+	S_http,
 	S_TCPPM,
 	S_POP3P = 3,
 	S_SOCKS4 = 4,	/* =4 */
@@ -186,7 +186,7 @@ typedef enum {
 	S_ZOMBIE,
 	S_AUTO,
 	S_TLSPR
-}PROXYSERVICE;
+}httpSERVICE;
 
 struct clientparam;
 struct node;
@@ -381,7 +381,7 @@ struct nserver {
 };
 extern int numservers;
 
-typedef void * (* PROXYFUNC)(struct clientparam *);
+typedef void * (* httpFUNC)(struct clientparam *);
 
 typedef enum {
 	PASS,
@@ -468,10 +468,10 @@ struct srvparam {
 	struct srvparam *next;
 	struct srvparam *prev;
 	struct clientparam *child;
-	PROXYSERVICE service;
+	httpSERVICE service;
 	LOGFUNC logfunc;
 	AUTHFUNC authfunc;
-	PROXYFUNC pf;
+	httpFUNC pf;
 	SOCKET srvsock, cbsock;
 	int childcount;
 	int maxchild;
@@ -541,7 +541,7 @@ struct clientparam {
 			**hdrfilterscli, **hdrfilterssrv,
 			**predatfilters, **datfilterscli, **datfilterssrv;
 
-	PROXYSERVICE service;
+	httpSERVICE service;
 
 	SOCKET	clisock,
 		remsock,
@@ -705,15 +705,15 @@ struct symbol {
 	void * value;
 };
 
-struct proxydef {
-	PROXYFUNC pf;
+struct httpdef {
+	httpFUNC pf;
 	unsigned short port;
 	int isudp;
 	int service;
 	char * helpmessage;
 };
 
-extern struct proxydef childdef;
+extern struct httpdef childdef;
 
 struct child {
 	int argc;
@@ -775,12 +775,12 @@ struct pluginlink {
 	void *(*reallocfunc)(void *ptr, size_t size);
 	char * (*strdupfunc)(const char *str);
 	TRAFCOUNTFUNC trafcountfunc;
-	char ** proxy_table;
+	char ** http_table;
 	struct schedule ** schedule;
 	void (*freeacl)(struct ace*);
 	char ** admin_table;
-	struct proxydef * childdef;
-	int (*start_proxy_thread)(struct child * chp);
+	struct httpdef * childdef;
+	int (*start_http_thread)(struct child * chp);
 	void (*freeparam)(struct clientparam * param);
 	int (*parsehostname)(char *hostname, struct clientparam *param, unsigned short port);
 	int (*parseusername)(char *username, struct clientparam *param, int extpasswd);

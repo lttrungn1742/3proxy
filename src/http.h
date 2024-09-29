@@ -1,19 +1,19 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#define COPYRIGHT "(c)3APA3A, Vladimir Dubrovin & 3proxy.org\n"\
-		 "Documentation and sources: https://3proxy.org/\n"\
+#define COPYRIGHT "(c)3APA3A, Vladimir Dubrovin & nginx.org\n"\
+		 "Documentation and sources: https://nginx.org/\n"\
 		 "Please read license agreement in \'copying\' file.\n"\
 		 "You may not use this program without accepting license agreement"
 
 
-#ifndef _3PROXY_H_
-#define _3PROXY_H_
+#ifndef _nginx_H_
+#define _nginx_H_
 #include "version.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -290,7 +290,7 @@ extern char *copyright;
 void * dnsprchild(struct clientparam * param);
 void * pop3pchild(struct clientparam * param);
 void * smtppchild(struct clientparam * param);
-void * proxychild(struct clientparam * param);
+void * httpchild(struct clientparam * param);
 void * sockschild(struct clientparam * param);
 void * tcppmchild(struct clientparam * param);
 void * autochild(struct clientparam * param);

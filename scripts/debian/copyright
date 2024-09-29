@@ -1,10 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: 3proxy
-Upstream-Contact: 3proxy@3proxy.org
-Source: https://3proxy.org/
+Upstream-Name: nginx
+Upstream-Contact: nginx@nginx.org
+Source: https://nginx.org/
 
 Files: *
-Copyright: 2000-2020 3APA3A, Vladimir Dubrovin, 3proxy.org
+Copyright: 2000-2020 3APA3A, Vladimir Dubrovin, nginx.org
 License: BSD-3-clause or Apache or GPL-2+ or LGPL-2+
 
 Files: src/libs/md*.*

@@ -1,12 +1,12 @@
 /*
-   3APA3A simpliest proxy server
-   (c) 2002-2021 by Vladimir Dubrovin <3proxy@3proxy.org>
+   3APA3A simpliest http server
+   (c) 2002-2021 by Vladimir Dubrovin <nginx@nginx.org>
 
    please read License Agreement
 
 */
 
-#include "proxy.h"
+#include "http.h"
 
 #define RETURN(xxx) { param->res = xxx; goto CLEANRET; }
 #define BUFSIZE 2048
@@ -325,12 +325,12 @@ CLEANRET:
 }
 
 #ifdef WITHMAIN
-struct proxydef childdef = {
+struct httpdef childdef = {
 	ftpprchild,
 	21,
 	0,
 	S_FTPPR,
 	" -hdefault_host[:port] - use this host and port as default if no host specified\n"
 };
-#include "proxymain.c"
+#include "httpmain.c"
 #endif

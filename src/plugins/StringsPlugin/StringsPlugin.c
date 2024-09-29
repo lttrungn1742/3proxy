@@ -11,15 +11,15 @@ extern "C" {
 #endif
 
 struct pluginlink * mypl;
-int count_load_str_proxy_from_file=0,count_load_str_admin_from_file=0;
-int count_str_proxy_in_3proxy=0,count_str_admin_in_3proxy=0;
-char ** old_proxy_table=NULL;
+int count_load_str_http_from_file=0,count_load_str_admin_from_file=0;
+int count_str_http_in_nginx=0,count_str_admin_in_nginx=0;
+char ** old_http_table=NULL;
 char ** old_admin_table=NULL;
 struct schedule myschedule;
 
 
 char **load_string(FILE *f,int max_count_str, int *countloadstr,
-			char *start,char *stop,char **table_3proxy)
+			char *start,char *stop,char **table_nginx)
 {
  int cstr=0,i=0;
  char tmpbuf1[1024],*rstr,*pt=NULL,*p=NULL;
@@ -94,9 +94,9 @@ char **load_string(FILE *f,int max_count_str, int *countloadstr,
      else 
       { 
        /* save old string */
-       old_table[i]=table_3proxy[i];
+       old_table[i]=table_nginx[i];
        /* replace string */
-       table_3proxy[i]=pt;
+       table_nginx[i]=pt;
        pt=NULL; i++; 
       }
 
@@ -117,17 +117,17 @@ static int restore_old_table(void * v)
 {
  int i; char *p=NULL;
 
- /* restore old proxy table */
- if(old_proxy_table) 
+ /* restore old http table */
+ if(old_http_table) 
   {
  
-    for(i=0; i < count_str_proxy_in_3proxy; i++){
-       p=mypl->proxy_table[i];
-       mypl->proxy_table[i]=old_proxy_table[i];
+    for(i=0; i < count_str_http_in_nginx; i++){
+       p=mypl->http_table[i];
+       mypl->http_table[i]=old_http_table[i];
        free(p);
       }
-    free(old_proxy_table);
-    old_proxy_table = NULL;
+    free(old_http_table);
+    old_http_table = NULL;
 
   }
 
@@ -137,7 +137,7 @@ static int restore_old_table(void * v)
  if(old_admin_table) 
   {
 
-   for(i=0; i < count_str_admin_in_3proxy; i++){
+   for(i=0; i < count_str_admin_in_nginx; i++){
        p=mypl->admin_table[i];
        mypl->admin_table[i]=old_admin_table[i];
        free(p);
@@ -158,7 +158,7 @@ BOOL WINAPI DllMain( HINSTANCE hModule,
 {
       if (ul_reason_for_call == DLL_PROCESS_DETACH)
       { 
-         if(old_proxy_table) {  restore_old_table(NULL); }
+         if(old_http_table) {  restore_old_table(NULL); }
      
       }
      return TRUE;
@@ -179,42 +179,42 @@ PLUGINAPI int PLUGINCALL start(struct pluginlink * pluginlink,
 
  mypl=pluginlink;
   
- if(old_proxy_table||old_admin_table) restore_old_table(NULL);
+ if(old_http_table||old_admin_table) restore_old_table(NULL);
   
  if(!(f=fopen(argv[1],"r"))) return 1001;
 
-  /*count string service PROXY in 3proxy  */
-  count_str_proxy_in_3proxy=0;
-  while( mypl->proxy_table[count_str_proxy_in_3proxy] != NULL ) 
-       { count_str_proxy_in_3proxy++; }
+  /*count string service http in nginx  */
+  count_str_http_in_nginx=0;
+  while( mypl->http_table[count_str_http_in_nginx] != NULL ) 
+       { count_str_http_in_nginx++; }
 
-  /*count string service ADMIN in 3proxy  */
-  count_str_admin_in_3proxy=0;
-  while( mypl->admin_table[count_str_admin_in_3proxy] != NULL ) 
-       { count_str_admin_in_3proxy++; }
+  /*count string service ADMIN in nginx  */
+  count_str_admin_in_nginx=0;
+  while( mypl->admin_table[count_str_admin_in_nginx] != NULL ) 
+       { count_str_admin_in_nginx++; }
 
-  /*---- load string for PROXY service ----*/
-   old_proxy_table=load_string(f,count_str_proxy_in_3proxy,
- 				&count_load_str_proxy_from_file,
-			       "[--proxy--]","[/--proxy--]",
-				mypl->proxy_table);
+  /*---- load string for http service ----*/
+   old_http_table=load_string(f,count_str_http_in_nginx,
+ 				&count_load_str_http_from_file,
+			       "[--http--]","[/--http--]",
+				mypl->http_table);
   
 
-  if (old_proxy_table == NULL) 
+  if (old_http_table == NULL) 
    { 
      fprintf(stderr,"Error StringsPlugin: No load string from file %s \
-             for service PROXY !\n",argv[1]);
+             for service http !\n",argv[1]);
    }
 
-  if(count_str_proxy_in_3proxy!= count_load_str_proxy_from_file)
+  if(count_str_http_in_nginx!= count_load_str_http_from_file)
     {
-     fprintf(stderr,"Warning StringsPlugin: Count string for service PROXY in\
-	3proxy not equality count string in file %s \n",argv[1]);
+     fprintf(stderr,"Warning StringsPlugin: Count string for service http in\
+	nginx not equality count string in file %s \n",argv[1]);
     }
 
 
   /*---- load string for ADMIN service ----*/
-   old_admin_table=load_string(f,count_str_admin_in_3proxy,
+   old_admin_table=load_string(f,count_str_admin_in_nginx,
  				&count_load_str_admin_from_file,
 			       "[--admin--]","[/--admin--]",
 				mypl->admin_table);
@@ -226,10 +226,10 @@ PLUGINAPI int PLUGINCALL start(struct pluginlink * pluginlink,
              for service ADMIN !\n",argv[1]);
    }
 
-  if(count_str_admin_in_3proxy!= count_load_str_admin_from_file)
+  if(count_str_admin_in_nginx!= count_load_str_admin_from_file)
     {
      fprintf(stderr,"Warning StringsPlugin: Count string for service ADMIN in\
-	3proxy not equality count string in file %s\n",argv[1]);
+	nginx not equality count string in file %s\n",argv[1]);
     }
 
   fclose(f);

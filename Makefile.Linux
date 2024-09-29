@@ -1,5 +1,5 @@
 #
-# 3 proxy Makefile for GCC/Linux/Cygwin
+# 3 http Makefile for GCC/Linux/Cygwin
 #
 # You can try to remove -DWITH_STD_MALLOC to CFLAGS to use optimized malloc
 # libraries
@@ -51,37 +51,37 @@ chroot_prefix	= /usr/local
 INSTALL		= /usr/bin/install
 INSTALL_BIN	= $(INSTALL) -m 755
 INSTALL_DATA	= $(INSTALL) -m 644
-INSTALL_OBJS	= bin/3proxy \
+INSTALL_OBJS	= bin/nginx \
 		  bin/ftppr \
 		  bin/mycrypt \
 		  bin/pop3p \
-		  bin/proxy \
+		  bin/http \
 		  bin/socks \
 		  bin/tcppm \
 		  bin/udppm
 		  
 
-INSTALL_CFG	 = scripts/3proxy.cfg.chroot
-INSTALL_CFG_OBJS = scripts/3proxy.cfg \
-		   scripts/add3proxyuser.sh
+INSTALL_CFG	 = scripts/nginx.cfg.chroot
+INSTALL_CFG_OBJS = scripts/nginx.cfg \
+		   scripts/addnginxuser.sh
 
 INSTALL_CFG_OBJS2 = counters bandlimiters
 
-INSTALL_INITD_SCRIPT = scripts/init.d/3proxy.sh
-INSTALL_SYSTEMD_SCRIPT = scripts/3proxy.service
+INSTALL_INITD_SCRIPT = scripts/init.d/nginx.sh
+INSTALL_SYSTEMD_SCRIPT = scripts/nginx.service
 
-CHROOTDIR	= $(DESTDIR)$(chroot_prefix)/3proxy
-CHROOTREL	= ../..$(chroot_prefix)/3proxy
+CHROOTDIR	= $(DESTDIR)$(chroot_prefix)/nginx
+CHROOTREL	= ../..$(chroot_prefix)/nginx
 MANDIR1		= $(DESTDIR)$(man_prefix)/man/man1
 MANDIR3		= $(DESTDIR)$(man_prefix)/man/man3
 MANDIR8		= $(DESTDIR)$(man_prefix)/man/man8
 BINDIR		= $(DESTDIR)$(exec_prefix)/bin
-ETCDIR		= $(DESTDIR)/etc/3proxy
+ETCDIR		= $(DESTDIR)/etc/nginx
 INITDDIR	= $(DESTDIR)/etc/init.d
 RUNBASE		= $(DESTDIR)/var/run
-RUNDIR		= $(RUNBASE)/3proxy
+RUNDIR		= $(RUNBASE)/nginx
 LOGBASE		= $(DESTDIR)/var/log
-LOGDIR		= $(LOGBASE)/3proxy
+LOGDIR		= $(LOGBASE)/nginx
 INSTALL_CFG_DEST = $(ETCDIR)/conf
 SYSTEMDDIR	= $(DESTDIR)/usr/lib/systemd/system/
 
@@ -105,7 +105,7 @@ install-chroot-dir:
 install-etc-default-config:
 	if [ ! -d $(INSTALL_CFG_DEST) ]; then \
 	   ln -s $(CHROOTREL)/conf $(INSTALL_CFG_DEST); \
-	   $(INSTALL_BIN) $(INSTALL_CFG) $(ETCDIR)/3proxy.cfg; \
+	   $(INSTALL_BIN) $(INSTALL_CFG) $(ETCDIR)/nginx.cfg; \
 	   $(INSTALL_BIN) $(INSTALL_CFG_OBJS) $(INSTALL_CFG_DEST); \
 	fi
 
@@ -123,7 +123,7 @@ install-man:
 
 install-init:
 	$(INSTALL_BIN) -d $(INITDDIR)
-	$(INSTALL_BIN) $(INSTALL_INITD_SCRIPT) $(INITDDIR)/3proxy
+	$(INSTALL_BIN) $(INSTALL_INITD_SCRIPT) $(INITDDIR)/nginx
 	$(INSTALL_BIN) -d $(SYSTEMDDIR)
 	$(INSTALL_DATA) $(INSTALL_SYSTEMD_SCRIPT) $(SYSTEMDDIR)
 
